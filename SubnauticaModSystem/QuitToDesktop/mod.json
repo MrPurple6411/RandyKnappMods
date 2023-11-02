@@ -1,9 +1,0 @@
-{
-  "Id": "QuitToDesktop",
-  "DisplayName": "QuitToDesktop",
-  "Author": "RandyKnapp - Metious",
-  "Version": "1.0.4",
-  "Game":  "Subnautica",
-  "Enable": true,
-  "AssemblyName": "QuitToDesktop.dll"
-}
