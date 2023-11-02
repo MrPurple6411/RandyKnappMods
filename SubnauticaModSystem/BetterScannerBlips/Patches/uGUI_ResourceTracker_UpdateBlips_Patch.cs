@@ -20,10 +20,10 @@ public class uGUI_ResourceTracker_UpdateBlips_Patch
 
     private static void Postfix(uGUI_ResourceTracker __instance)
     {
-        if (Input.GetKeyDown(Config.ToggleKey))
+        if (Input.GetKeyDown(Settings.ToggleKey))
         {
             hide = !hide;
-            ErrorMessage.AddDebug(string.Format("Scanner Blips Toggled: {0}", hide ? $"OFF (Press {Config.ToggleKey} to show)" : "ON"));
+            ErrorMessage.AddDebug(string.Format("Scanner Blips Toggled: {0}", hide ? $"OFF (Press {Settings.ToggleKey} to show)" : "ON"));
         }
 
         HashSet<ResourceTrackerDatabase.ResourceInfo> nodes = __instance.nodes;

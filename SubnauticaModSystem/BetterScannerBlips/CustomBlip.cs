@@ -52,13 +52,13 @@ internal class CustomBlip : MonoBehaviour
 
     private void RefreshText(float distance)
     {
-        if (Config.NoText)
+        if (Settings.NoText)
         {
             text.gameObject.SetActive(false);
         }
         else
         {
-            if (Config.ShowDistance)
+            if (Settings.ShowDistance)
             {
                 string meters = (distance < 5 ? Math.Round(distance, 1) : Mathf.RoundToInt(distance)).ToString();
                 text.text = resourceName + " " + meters + "m";
@@ -67,29 +67,29 @@ internal class CustomBlip : MonoBehaviour
             {
                 text.text = resourceName;
             }
-            text.gameObject.SetActive(distance < Config.TextRange);
+            text.gameObject.SetActive(distance < Settings.TextRange);
         }
     }
 
     private void RefreshScale(float distance)
     {
-        if (distance < Config.MinRange)
+        if (distance < Settings.MinRange)
         {
-            SetScale(Config.MinRangeScale);
+            SetScale(Settings.MinRangeScale);
         }
-        else if (distance >= Config.MinRange && distance < Config.CloseRange)
+        else if (distance >= Settings.MinRange && distance < Settings.CloseRange)
         {
-            var t = Mathf.InverseLerp(Config.MinRange, Config.CloseRange, distance);
-            SetScale(Mathf.Lerp(Config.MinRangeScale, Config.CloseRangeScale, t));
+            var t = Mathf.InverseLerp(Settings.MinRange, Settings.CloseRange, distance);
+            SetScale(Mathf.Lerp(Settings.MinRangeScale, Settings.CloseRangeScale, t));
         }
-        else if (distance >= Config.CloseRange && distance < Config.MaxRange)
+        else if (distance >= Settings.CloseRange && distance < Settings.MaxRange)
         {
-            var t = Mathf.InverseLerp(Config.CloseRange, Config.MaxRange, distance);
-            SetScale(Mathf.Lerp(Config.CloseRangeScale, Config.MaxRangeScale, t));
+            var t = Mathf.InverseLerp(Settings.CloseRange, Settings.MaxRange, distance);
+            SetScale(Mathf.Lerp(Settings.CloseRangeScale, Settings.MaxRangeScale, t));
         }
-        else if (distance >= Config.MaxRange)
+        else if (distance >= Settings.MaxRange)
         {
-            SetScale(Config.MaxRangeScale);
+            SetScale(Settings.MaxRangeScale);
         }
     }
 
@@ -100,10 +100,10 @@ internal class CustomBlip : MonoBehaviour
 
     private void RefreshColor(float distance)
     {
-        if (Config.CustomColors)
+        if (Settings.CustomColors)
         {
-            image.color = Config.CircleColor;
-            text.color = Config.TextColor;
+            image.color = Settings.CircleColor;
+            text.color = Settings.TextColor;
         }
         else
         {
@@ -111,14 +111,14 @@ internal class CustomBlip : MonoBehaviour
             text.color = defaultTextColour;
         }
 
-        if (distance < Config.AlphaOutRange)
+        if (distance < Settings.AlphaOutRange)
         {
-            SetAlpha(Config.MaxAlpha);
+            SetAlpha(Settings.MaxAlpha);
         }
         else
         {
-            var t = Mathf.InverseLerp(Config.AlphaOutRange, Config.MaxRange, distance);
-            SetAlpha(Mathf.Lerp(Config.MaxAlpha, Config.MinAlpha, t));
+            var t = Mathf.InverseLerp(Settings.AlphaOutRange, Settings.MaxRange, distance);
+            SetAlpha(Mathf.Lerp(Settings.MaxAlpha, Settings.MinAlpha, t));
         }
     }
 

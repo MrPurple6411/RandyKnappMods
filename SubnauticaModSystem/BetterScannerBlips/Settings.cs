@@ -5,7 +5,7 @@ using Nautilus.Json;
 using Nautilus.Options.Attributes;
 using UnityEngine;
 
-public class Config : ConfigFile
+public class Settings : ConfigFile
 {
     [Slider("Max Range", 0, 500f)]
     public float maxRange = 200.0f;
@@ -55,7 +55,7 @@ public class Config : ConfigFile
     [Keybind("Toggle Key")]
     public KeyCode toggleKey = KeyCode.L;
 
-    public static Config Instance { get; } = OptionsPanelHandler.RegisterModOptions<Config>();
+    public static Settings Instance { get; } = OptionsPanelHandler.RegisterModOptions<Settings>();
 
     public static float MaxRange => Instance.maxRange;
     public static float MaxRangeScale => Instance.maxRangeScale;
