@@ -1,135 +1,135 @@
-﻿using Common.Utility;
+﻿namespace BetterScannerBlips;
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BetterScannerBlips
+internal class CustomBlip : MonoBehaviour
 {
-	class CustomBlip : MonoBehaviour
-	{
-		private static Color circleColor;
-		private static Color textColor;
+    private Image image;
+    private TextMeshProUGUI text;
+    private TechType techType;
+    private string resourceName;
 
-		private Image image;
-		private Text text;
-		private TechType techType;
-		private string resourceName;
+    private Color defaultCircleColour;
+    private Color defaultTextColour;
 
-		public static void InitializeColors()
-		{
-			if (Mod.config.CustomColors)
-			{
-				if (!ColorUtility.TryParseHtmlString(Mod.config.CircleColor, out circleColor))
-				{
-					circleColor = new Color(1, 1, 1, 1);
-				}
-				if (!ColorUtility.TryParseHtmlString(Mod.config.TextColor, out textColor))
-				{
-					textColor = new Color(1, 1, 1, 1);
-				}
-			}
-		}
+    public void Awake()
+    {
+        image = gameObject.GetComponent<Image>();
+        if (defaultCircleColour == default)
+        {
+            defaultCircleColour = image.color;
+        }
 
-		private void Awake()
-		{
-			image = gameObject.GetComponent<Image>();
-			text = gameObject.GetComponentInChildren<Text>();
-		}
+        text = gameObject.GetComponentInChildren<TextMeshProUGUI>();
 
-		public void Refresh(ResourceTracker.ResourceInfo target)
-		{
-			if (target != null)
-			{
-				var vectorToPlayer = Player.main.transform.position - target.position;
-				var distance = vectorToPlayer.magnitude;
+        if (defaultTextColour == default)
+        {
+            defaultTextColour = text.color;
+        }
+    }
 
-				if (resourceName == string.Empty || techType != target.techType)
-				{
-					techType = target.techType;
-					resourceName = Language.main.Get(techType);
-				}
+    public void Refresh(ResourceTrackerDatabase.ResourceInfo target)
+    {
+        if (target != null)
+        {
+            var vectorToPlayer = Player.main.transform.position - target.position;
+            var distance = vectorToPlayer.magnitude;
 
-				RefreshColor(distance);
-				RefreshText(distance);
-				RefreshScale(distance);
-			}
-		}
+            if (resourceName == string.Empty || techType != target.techType)
+            {
+                techType = target.techType;
+                resourceName = Language.main.Get(techType);
+            }
 
-		private void RefreshText(float distance)
-		{
-			if (Mod.config.NoText)
-			{
-				text.gameObject.SetActive(false);
-			}
-			else
-			{
-				if (Mod.config.ShowDistance)
-				{
-					string meters = (distance < 5 ? Math.Round(distance, 1) : Mathf.RoundToInt(distance)).ToString();
-					text.text = resourceName + " " + meters + "m";
-				}
-				text.gameObject.SetActive(distance < Mod.config.TextRange);
-			}
-		}
+            RefreshColor(distance);
+            RefreshText(distance);
+            RefreshScale(distance);
+        }
+    }
 
-		private void RefreshScale(float distance)
-		{
-			if (distance < Mod.config.MinRange)
-			{
-				SetScale(Mod.config.MinRangeScale);
-			}
-			else if (distance >= Mod.config.MinRange && distance < Mod.config.CloseRange)
-			{
-				var t = Mathf.InverseLerp(Mod.config.MinRange, Mod.config.CloseRange, distance);
-				SetScale(Mathf.Lerp(Mod.config.MinRangeScale, Mod.config.CloseRangeScale, t));
-			}
-			else if (distance >= Mod.config.CloseRange && distance < Mod.config.MaxRange)
-			{
-				var t = Mathf.InverseLerp(Mod.config.CloseRange, Mod.config.MaxRange, distance);
-				SetScale(Mathf.Lerp(Mod.config.CloseRangeScale, Mod.config.MaxRangeScale, t));
-			}
-			else if (distance >= Mod.config.MaxRange)
-			{
-				SetScale(Mod.config.MaxRangeScale);
-			}
-		}
+    private void RefreshText(float distance)
+    {
+        if (Config.NoText)
+        {
+            text.gameObject.SetActive(false);
+        }
+        else
+        {
+            if (Config.ShowDistance)
+            {
+                string meters = (distance < 5 ? Math.Round(distance, 1) : Mathf.RoundToInt(distance)).ToString();
+                text.text = resourceName + " " + meters + "m";
+            }
+            else
+            {
+                text.text = resourceName;
+            }
+            text.gameObject.SetActive(distance < Config.TextRange);
+        }
+    }
 
-		private void SetScale(float scale)
-		{
-			transform.localScale = new Vector3(scale, scale, 1);
-		}
+    private void RefreshScale(float distance)
+    {
+        if (distance < Config.MinRange)
+        {
+            SetScale(Config.MinRangeScale);
+        }
+        else if (distance >= Config.MinRange && distance < Config.CloseRange)
+        {
+            var t = Mathf.InverseLerp(Config.MinRange, Config.CloseRange, distance);
+            SetScale(Mathf.Lerp(Config.MinRangeScale, Config.CloseRangeScale, t));
+        }
+        else if (distance >= Config.CloseRange && distance < Config.MaxRange)
+        {
+            var t = Mathf.InverseLerp(Config.CloseRange, Config.MaxRange, distance);
+            SetScale(Mathf.Lerp(Config.CloseRangeScale, Config.MaxRangeScale, t));
+        }
+        else if (distance >= Config.MaxRange)
+        {
+            SetScale(Config.MaxRangeScale);
+        }
+    }
 
-		private void RefreshColor(float distance)
-		{
-			if (Mod.config.CustomColors)
-			{
-				image.color = circleColor;
-				text.color = textColor;
-			}
+    private void SetScale(float scale)
+    {
+        transform.localScale = new Vector3(scale, scale, 1);
+    }
 
-			if (distance < Mod.config.AlphaOutRange)
-			{
-				SetAlpha(Mod.config.MaxAlpha);
-			}
-			else
-			{
-				var t = Mathf.InverseLerp(Mod.config.AlphaOutRange, Mod.config.MaxRange, distance);
-				SetAlpha(Mathf.Lerp(Mod.config.MaxAlpha, Mod.config.MinAlpha, t));
-			}
-		}
+    private void RefreshColor(float distance)
+    {
+        if (Config.CustomColors)
+        {
+            image.color = Config.CircleColor;
+            text.color = Config.TextColor;
+        }
+        else
+        {
+            image.color = defaultCircleColour;
+            text.color = defaultTextColour;
+        }
 
-		private void SetAlpha(float alpha)
-		{
-			var iColor = image.color;
-			iColor.a = alpha;
-			image.color = iColor;
+        if (distance < Config.AlphaOutRange)
+        {
+            SetAlpha(Config.MaxAlpha);
+        }
+        else
+        {
+            var t = Mathf.InverseLerp(Config.AlphaOutRange, Config.MaxRange, distance);
+            SetAlpha(Mathf.Lerp(Config.MaxAlpha, Config.MinAlpha, t));
+        }
+    }
 
-			var tColor = text.color;
-			tColor.a = alpha;
-			text.color = tColor;
-		}
-	}
+    private void SetAlpha(float alpha)
+    {
+        var iColor = image.color;
+        iColor.a = alpha;
+        image.color = iColor;
+
+        var tColor = text.color;
+        tColor.a = alpha;
+        text.color = tColor;
+    }
 }

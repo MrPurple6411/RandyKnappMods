@@ -1,81 +1,59 @@
-﻿using Common.Mod;
-using Harmony;
-using System;
-using System.Collections;
+﻿namespace BetterScannerBlips.Patches;
+
+using HarmonyLib;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.UI;
 
-namespace BetterScannerBlips.Patches
+[HarmonyPatch(typeof(uGUI_ResourceTracker), nameof(uGUI_ResourceTracker.UpdateBlips))]
+public class uGUI_ResourceTracker_UpdateBlips_Patch
 {
-	[HarmonyPatch(typeof(uGUI_ResourceTracker))]
-	[HarmonyPatch("UpdateBlips")]
-	class uGUI_ResourceTracker_UpdateBlips_Patch
-	{
-		private static readonly FieldInfo uGUI_ResourceTracker_blips = typeof(uGUI_ResourceTracker).GetField("blips", BindingFlags.NonPublic | BindingFlags.Instance);
-		private static readonly FieldInfo uGUI_ResourceTracker_nodes = typeof(uGUI_ResourceTracker).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
-		private static FieldInfo Blip_gameObject;
+    private static bool hide = false;
 
-		private static bool hide = false;
+    private static void Prefix(uGUI_ResourceTracker __instance)
+    {
+        if (__instance == null || __instance.blip == null || __instance.blip.GetComponent<CustomBlip>() != null)
+            return;
 
-		private static bool Prefix(uGUI_ResourceTracker __instance)
-		{
-			if (__instance != null && __instance.blip != null)
-			{
-				if (__instance.blip.GetComponent<CustomBlip>() == null)
-				{
-					Logger.Log("Adding CustomBlip to blip prefab");
-					__instance.blip.AddComponent<CustomBlip>();
-				}
-			}
+        Plugin.Logger.LogDebug("Adding CustomBlip to blip prefab");
+        __instance.blip.AddComponent<CustomBlip>();
+    }
 
-			return true;
-		}
+    private static void Postfix(uGUI_ResourceTracker __instance)
+    {
+        if (Input.GetKeyDown(Config.ToggleKey))
+        {
+            hide = !hide;
+            ErrorMessage.AddDebug(string.Format("Scanner Blips Toggled: {0}", hide ? $"OFF (Press {Config.ToggleKey} to show)" : "ON"));
+        }
 
-		private static void Postfix(uGUI_ResourceTracker __instance)
-		{
-			if (Blip_gameObject == null)
-			{
-				Type BlipT = typeof(uGUI_ResourceTracker).GetNestedType("Blip", BindingFlags.NonPublic);
-				Blip_gameObject = BlipT.GetField("gameObject", BindingFlags.Public | BindingFlags.Instance);
-			}
+        HashSet<ResourceTrackerDatabase.ResourceInfo> nodes = __instance.nodes;
+        var blips = __instance.blips;
 
-			if (Input.GetKeyDown(Mod.config.ToggleKey))
-			{
-				hide = !hide;
-				ErrorMessage.AddDebug(string.Format("Scanner Blips Toggled: {0}", hide ? $"OFF (Press {Mod.config.ToggleKey} to show)" : "ON"));
-			}
+        Camera camera = MainCamera.camera;
+        Vector3 position = camera.transform.position;
+        Vector3 forward = camera.transform.forward;
+        int i = 0;
+        foreach (ResourceTrackerDatabase.ResourceInfo resourceInfo in nodes)
+        {
+            Vector3 lhs = resourceInfo.position - position;
+            if (Vector3.Dot(lhs, forward) > 0f)
+            {
+                var blipObject = blips[i].gameObject;
+                var customBlip = blipObject.GetComponent<CustomBlip>();
 
-			HashSet<ResourceTracker.ResourceInfo> nodes = (HashSet<ResourceTracker.ResourceInfo>)uGUI_ResourceTracker_nodes.GetValue(__instance);
-			IList blips = (IList)uGUI_ResourceTracker_blips.GetValue(__instance);
+                customBlip.Refresh(resourceInfo);
 
-			Camera camera = MainCamera.camera;
-			Vector3 position = camera.transform.position;
-			Vector3 forward = camera.transform.forward;
-			int i = 0;
-			foreach (ResourceTracker.ResourceInfo resourceInfo in nodes)
-			{
-				Vector3 lhs = resourceInfo.position - position;
-				if (Vector3.Dot(lhs, forward) > 0f)
-				{
-					var blipObject = (GameObject)Blip_gameObject.GetValue(blips[i]);
-					var customBlip = blipObject.GetComponent<CustomBlip>();
+                i++;
+            }
+        }
 
-					customBlip.Refresh(resourceInfo);
-
-					i++;
-				}
-			}
-
-			for (var j = 0; j < blips.Count; ++j)
-			{
-				var blipObject = (GameObject)Blip_gameObject.GetValue(blips[j]);
-				if (hide)
-				{
-					blipObject.SetActive(false);
-				}
-			}
-		}
-	}
+        for (var j = 0; j < blips.Count; ++j)
+        {
+            var blipObject = blips[j].gameObject;
+            if (hide)
+            {
+                blipObject.SetActive(false);
+            }
+        }
+    }
 }
