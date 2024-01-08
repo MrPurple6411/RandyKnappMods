@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<AssemblyName>BetterScannerBlips</AssemblyName>
 		<Product>Better Scanner Blips (Purple Edition)</Product>
-		<Version>2.0.0.0</Version>
+		<Version>1.0.0.0</Version>
 		<OutputPath>$(SolutionDir)bin\$(Configuration)\$(AssemblyName)\</OutputPath>
 	</PropertyGroup>
 </Project>

@@ -5,6 +5,7 @@ using Nautilus.Json;
 using Nautilus.Options.Attributes;
 using UnityEngine;
 
+[Menu("Better Scanner Blips")]
 public class Settings : ConfigFile
 {
     [Slider("Max Range", 0, 500f)]
