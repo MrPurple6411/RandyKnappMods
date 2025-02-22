@@ -15,7 +15,7 @@ using QuitToDesktop.Configuration;
 #endif
 public class Plugin : BaseUnityPlugin
 {
-    public void Awake()
+    private void Awake()
     {
         Settings.Instance.Load();
         Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), MyPluginInfo.PLUGIN_GUID);
